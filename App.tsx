@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Library } from './components/Library';
-import { Reader } from './components/Reader';
-import { processMangaFile } from './utils/zipUtils';
+import { Library } from './Library';
+import { Reader } from './Reader';
+import OCRReader from './OCRReader';
+import { processMangaFile } from './zipUtils';
 import { MangaItem, LibraryItem } from './types';
 
 function App() {
@@ -56,6 +57,9 @@ function App() {
         onSelect={handleSelectManga} 
         onUpload={handleUpload} 
       />
+      <div className="mt-6">
+        <OCRReader />
+      </div>
       
       {/* Loading Overlay */}
       {isLoading && (

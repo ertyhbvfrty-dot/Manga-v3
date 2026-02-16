@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { MangaItem, OCRCache, SpeechBubble } from '../types';
-import { analyzeMangaPages, blobUrlToBase64 } from '../utils/ocr';
+import { MangaItem, OCRCache, SpeechBubble } from './types';
+import { analyzeMangaPages, blobUrlToBase64 } from './ocr';
 
 interface ReaderProps {
   manga: MangaItem;
