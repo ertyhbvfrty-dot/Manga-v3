@@ -23,6 +23,9 @@ export async function initModels(options: {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const wasmPath = `${baseUrl.endsWith('/') ? baseUrl : baseUrl + '/'}onnx/`;
   
+  console.log('Initializing OCR models with BASE_URL:', baseUrl);
+  console.log('WASM path:', wasmPath);
+  
   // Set WASM path configuration before creating sessions
   try {
     ort.env.wasm.wasmPaths = {
@@ -31,16 +34,33 @@ export async function initModels(options: {
       'ort-wasm-simd-threaded.asyncify.wasm': `${wasmPath}ort-wasm-simd-threaded.asyncify.wasm`,
       'ort-wasm-simd-threaded.jsep.wasm': `${wasmPath}ort-wasm-simd-threaded.jsep.wasm`,
     };
+    console.log('WASM paths configured successfully');
   } catch (e) {
     // wasmPaths may not be writable on all environments; fallback to default behavior
     console.warn('Could not set wasmPaths:', e);
   }
   
   if (!detSession && detModelUrl) {
-    detSession = await ort.InferenceSession.create(detModelUrl, {executionProviders: ['wasm']});
+    console.log('Loading detection model from:', detModelUrl);
+    try {
+      detSession = await ort.InferenceSession.create(detModelUrl, {executionProviders: ['wasm']});
+      console.log('Detection model loaded successfully');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error('Failed to load detection model:', msg);
+      throw new Error(`Detection model loading failed: ${msg}`);
+    }
   }
   if (!recSession && recModelUrl) {
-    recSession = await ort.InferenceSession.create(recModelUrl, {executionProviders: ['wasm']});
+    console.log('Loading recognition model from:', recModelUrl);
+    try {
+      recSession = await ort.InferenceSession.create(recModelUrl, {executionProviders: ['wasm']});
+      console.log('Recognition model loaded successfully');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error('Failed to load recognition model:', msg);
+      throw new Error(`Recognition model loading failed: ${msg}`);
+    }
   }
   return {detSession, recSession};
 }

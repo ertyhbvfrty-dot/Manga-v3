@@ -9,6 +9,8 @@ export default function OCRReader(_: Props) {
   const [showBoxes, setShowBoxes] = useState(true);
   const [groups, setGroups] = useState<OCRBox[]>([]);
   const [selectedText, setSelectedText] = useState<string | null>(null);
+  const [modelsAvailable, setModelsAvailable] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -16,18 +18,23 @@ export default function OCRReader(_: Props) {
     (async () => {
       try {
         const base = import.meta.env.BASE_URL || '/';
+        const detUrl = `${base}models/ch_PP-OCRv4_det_infer.onnx`;
+        const recUrl = `${base}models/en_PP-OCRv4_rec_infer.onnx`;
+        console.log('Attempting to load models from:', {detUrl, recUrl});
         await initModels({
-          wasmPaths: `${base}onnx/`,
-          detModelUrl: `${base}models/ch_PP-OCRv4_det_infer.onnx`,
-          recModelUrl: `${base}models/en_PP-OCRv4_rec_infer.onnx`,
+          detModelUrl: detUrl,
+          recModelUrl: recUrl,
         });
         setModelsAvailable(true);
+        setInitError(null);
       } catch (e) {
-        console.warn('Model init failed (this app expects model files in /models):', e);
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error('Model init failed:', msg);
+        setInitError(`Error loading OCR models: ${msg}. Check console for details.`);
+        setModelsAvailable(false);
       }
     })();
   }, []);
-  const [modelsAvailable, setModelsAvailable] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -74,8 +81,9 @@ export default function OCRReader(_: Props) {
         setSelectedText(sample[0].text || null);
       }
     } catch (e) {
-      console.error(e);
-      alert('OCR failed. See console for details.');
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error('OCR scan failed:', msg);
+      alert(`OCR scan failed: ${msg}\nCheck console for full details.`);
     } finally {
       setProcessing(false);
     }
@@ -99,6 +107,18 @@ export default function OCRReader(_: Props) {
 
   return (
     <div className="p-4 border rounded-md bg-white/5">
+      {initError && (
+        <div className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded text-red-200 text-sm">
+          <div className="font-semibold">⚠ {initError}</div>
+          <div className="text-xs mt-1 text-red-300">Running in demo mode. Real OCR models not loaded.</div>
+        </div>
+      )}
+      {modelsAvailable && (
+        <div className="mb-4 p-2 bg-green-900/20 border border-green-700 rounded text-green-200 text-sm">
+          ✓ OCR models loaded successfully
+        </div>
+      )}
+      
       <div className="flex gap-4 items-center">
         <label className="p-2 border rounded cursor-pointer bg-gray-800">
           Upload Image
