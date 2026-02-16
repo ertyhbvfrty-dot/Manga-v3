@@ -15,10 +15,11 @@ export default function OCRReader(_: Props) {
   useEffect(() => {
     (async () => {
       try {
+        const base = import.meta.env.BASE_URL || '/';
         await initModels({
-          wasmPaths: '/onnx/',
-          detModelUrl: '/models/ch_PP-OCRv4_det_infer.onnx',
-          recModelUrl: '/models/en_PP-OCRv4_rec_infer.onnx',
+          wasmPaths: `${base}onnx/`,
+          detModelUrl: `${base}models/ch_PP-OCRv4_det_infer.onnx`,
+          recModelUrl: `${base}models/en_PP-OCRv4_rec_infer.onnx`,
         });
         setModelsAvailable(true);
       } catch (e) {

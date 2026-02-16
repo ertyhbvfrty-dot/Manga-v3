@@ -4,4 +4,13 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/Manga-v3/',
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      external: [
+        'jszip',
+        '@google/genai',
+        'onnxruntime-web'
+      ]
+    }
+  }
 })
