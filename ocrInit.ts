@@ -17,10 +17,25 @@ export async function initModels(options: {
   detModelUrl?: string;
   recModelUrl?: string;
 } = {}) {
-  const {wasmPaths, detModelUrl, recModelUrl} = options;
-  // Note: setting a runtime WASM path on the imported module can break bundlers.
-  // If you need a custom WASM path, pass it to the loader at app startup or
-  // host the WASM at the default location (/onnx/ort-wasm.wasm).
+  const {detModelUrl, recModelUrl} = options;
+  
+  // Configure WASM paths to use BASE_URL for GitHub Pages compatibility
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const wasmPath = `${baseUrl.endsWith('/') ? baseUrl : baseUrl + '/'}onnx/`;
+  
+  // Set WASM path configuration before creating sessions
+  try {
+    ort.env.wasm.wasmPaths = {
+      'ort-wasm-simd-threaded.wasm': `${wasmPath}ort-wasm-simd-threaded.wasm`,
+      'ort-wasm-simd-threaded.jspi.wasm': `${wasmPath}ort-wasm-simd-threaded.jspi.wasm`,
+      'ort-wasm-simd-threaded.asyncify.wasm': `${wasmPath}ort-wasm-simd-threaded.asyncify.wasm`,
+      'ort-wasm-simd-threaded.jsep.wasm': `${wasmPath}ort-wasm-simd-threaded.jsep.wasm`,
+    };
+  } catch (e) {
+    // wasmPaths may not be writable on all environments; fallback to default behavior
+    console.warn('Could not set wasmPaths:', e);
+  }
+  
   if (!detSession && detModelUrl) {
     detSession = await ort.InferenceSession.create(detModelUrl, {executionProviders: ['wasm']});
   }
