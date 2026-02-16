@@ -1,5 +1,5 @@
 # Manga-v3 — Local OCR Reader (browser-first)
-
+#https://ertyhbvfrty-dot.github.io/Manga-v3/
 This project includes a browser-run OCR integration using `onnxruntime-web` and local ONNX models. The app expects model and WASM assets to be served from the project root (e.g. `public/` in Next.js or root for static hosting).
 
 Required model files (English-only):
